@@ -202,3 +202,11 @@ Finish and reboot
 
 After reboot, you’ll be logged into a fully working Ubuntu Server VM.    
 
+Configure your static IP address using netplan
+
+
+
+
+
+
+
