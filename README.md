@@ -60,5 +60,58 @@ All VMs on same VirtualBox Host-Only Adapter.
 
 ## Step by Step
 
+1. Launched VirutalBox & Downloaded Ubuntu Server ISO
+2. Create Your VMs in VirtualBox (x3)
+
+You’ll be making 3 VMs:
+
+web-vm
+
+db-vm
+
+admin-vm (optional but good for practice)
+
+For each VM, do the following:
+
+a. Create New VM
+
+Name: web-vm (or whatever function)
+
+Type: Linux
+
+Version: Ubuntu (64-bit)
+
+b. Allocate Resources
+
+RAM: 1 GB minimum (2 GB if you can)
+
+CPUs: 1 or 2 is fine
+
+Disk: ~10 GB VDI dynamically allocated
+
+c. Attach the ISO
+
+Go to Settings > Storage
+
+Click the empty optical drive
+
+Load the Ubuntu Server .iso you downloaded
+
+d. Network Configuration
+
+Go to Settings > Network
+
+Adapter 1 → Enable it
+
+Attached to: Host-only Adapter
+
+This isolates the lab from your main network
+
+(Optional) Adapter 2 → NAT
+
+If you want outbound internet for package installs
+
+3. Install Ubuntu Server on Each VM
+
 
 
