@@ -32,7 +32,7 @@ No implicit trust between workloads
 
 <img width="566" height="567" alt="fw1" src="https://github.com/user-attachments/assets/478a554c-c6ee-4dda-b028-fbfbc647b374" />
 
-### Zero Trust Enforcement
+## Zero Trust Enforcement
 
 This lab enforces Zero Trust based on NIST SP 800-207 guidance.
 
@@ -42,8 +42,8 @@ This lab enforces Zero Trust based on NIST SP 800-207 guidance.
 - Outbound access is denied unless explicitly allowed — stopping exfiltration early
 - Communication is limited regardless of subnet, IP range, or internal/external location
 
-### Setup
-#### VMs and Their Roles:
+## Setup
+### VMs and Their Roles:
 
 web-vm - IP: 192.168.56.101
 Role: Frontend application server. Initiates connections to the database only. No direct external or internal access to other resources.
@@ -58,7 +58,7 @@ Each VM represents a different function or trust zone, and policies are designed
 
 All VMs on same VirtualBox Host-Only Adapter.
 
-### Step by Step
+## Step by Step
 
 
 
