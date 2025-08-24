@@ -108,4 +108,97 @@ All VMs on same VirtualBox Host-Only Adapter.
 
 4. Install Ubuntu Server on Each VM
 
+🔧 What to Do After Ubuntu Server ISO Finishes Downloading
+1. Open VirtualBox
+
+Launch VirtualBox on your Windows system.
+
+2. Create a New VM
+
+Click “New” and fill this out:
+
+Name: web-vm (or db-vm, or admin-vm, depending on which one you’re creating first)
+
+Type: Linux
+
+Version: Ubuntu (64-bit)
+
+Click Next
+
+3. Allocate Resources
+
+RAM: 1024 MB (1 GB minimum, 2048 MB is better)
+
+CPU: 1 or 2 (adjust if your system has more cores)
+
+Click Next
+
+4. Create a Virtual Hard Disk
+
+Select: Create a virtual hard disk now
+
+Disk type: VDI
+
+Storage: Dynamically allocated
+
+Size: 10 GB or more
+
+Click Create
+
+5. Attach the Ubuntu ISO
+
+Once the VM is created:
+
+Select the VM (e.g., web-vm)
+
+Click Settings > Storage
+
+Under Controller: IDE, click the Empty disk icon
+
+On the right side, click the CD icon, then choose “Choose a disk file…”
+
+Browse to where your .iso file was downloaded (e.g., Downloads)
+→ Select your ubuntu-22.04.4-live-server-amd64.iso
+
+Click OK
+
+6. Set Network to Host-Only
+
+Go to Settings > Network
+
+Adapter 1: Enabled
+
+Attached to: Host-Only Adapter
+
+(Optional: Add Adapter 2 as NAT if you want internet access later)
+
+7. Start the VM
+
+Click Start
+
+The VM will boot from the ISO file (like a real server booting from a CD)
+
+You’ll be in the Ubuntu Server installer
+
+8. Install Ubuntu Server
+
+In the Ubuntu Server installer:
+
+Select language: English
+
+Choose “Install Ubuntu Server”
+
+Accept network defaults for now
+
+Set a hostname (web-vm, etc.)
+
+Create a user (labuser or whatever you want)
+
+Choose “Install OpenSSH server” when prompted
+
+Continue with installation (guided disk partitioning is fine)
+
+Finish and reboot
+
+After reboot, you’ll be logged into a fully working Ubuntu Server VM.    
 
