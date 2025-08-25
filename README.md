@@ -55,112 +55,141 @@ Each VM represents a different function or trust zone, and policies are designed
 
 All VMs on same VirtualBox Host-Only Adapter.
 
-## Step by Step
+## Setup Steps
 
-1. Launched VirutalBox & Downloaded Ubuntu Server ISO
-2. Created VMs in VirtualBox (x2)
+### 1. Launched VirutalBox & Downloaded Ubuntu Server ISO
 
-      Made 2 VMs:
-      
-         - web-vm
-         - db-vm
-      
-      Set the following for the first VM, (cloned this for the 2nd VM)
-      
-      a. Create New VM
-           Name: web-vm (or whatever function)
-           Type: Linux
-           Version: Ubuntu (64-bit)
+---
 
-     b. Allocate Resources
-          
-          RAM: 1 GB minimum (2 GB if you can)
-          
-          CPUs: 1 or 2 is fine
-          
-          Disk: ~10 GB VDI dynamically allocated
-          
-      c. Attach the ISO
-      
-          Go to Settings > Storage
-          
-          Click the empty optical drive
-          
-          Load the Ubuntu Server .iso you downloaded
-      
-      d. Network Configuration
-      
-          Go to Settings > Network
-          
-          Adapter 1 → Enable it
-          
-          Attached to: Host-only Adapter
-          
-          This isolates the lab from your main network
-          
-          (Optional) Adapter 2 → NAT
-          
-          If you want outbound internet for package installs
+### 2. Created First VM in VirtualBox
 
-4. Installed Ubuntu Server on VM
+Created `web-vm`. Later cloned it to create `db-vm`.
 
+**Settings:**
+- RAM: 1–2 GB
+- Disk: 10 GB (dynamically allocated)
+- CPUs: 1–2 cores
+- Network: Host-Only Adapter (Adapter 1), optional NAT (Adapter 2)
+- Attached ISO via:  
+  `Settings > Storage > Empty Optical Drive > Choose ISO`
 
-5. Started the VM
+  ---
+  
+### 3. Installed Ubuntu Server on VM
 
-      Click Start
-      
-      In the Ubuntu Server installer:
-      
-      Select language: English
-      
-      Choose “Install Ubuntu Server”
-      
-      Accept network defaults for now
-      
-      Set a hostname (web-vm, etc.)
-      
-      Create a user (labuser or whatever you want)
-      
-      Choose “Install OpenSSH server” when prompted
-      
-      Continue with installation (guided disk partitioning is fine)
-      
-      Finish and reboot
-      
-      After reboot, you’ll be logged into a fully working Ubuntu Server VM.    
+Inside VM:
+- Selected language: English
+- Set hostname (e.g., `web-vm`)
+- Created user account
+- Chose: **Install OpenSSH server**
+- Used guided partitioning
+- Rebooted and was logged into a fully working Ubuntu Server VM. 
 
-Configured static IP address using netplan
+---
+### 4. Assigned Static IP Using Netplan
 
-6. Created db-vm (Next VM)
+Edited `/etc/netplan/00-installer-config.yaml`:
+
+		```yaml
+		network:
+		  version: 2
+		  ethernets:
+		    enp0s3:
+		      dhcp4: no
+		      addresses: []
+		      gateway4: []
+		      nameservers:
+		        addresses: []
+
+Applied config:
+
+		sudo chmod 600 /etc/netplan/00-installer-config.yaml
+		sudo netplan apply
+  ---
+  
+### 5. Created db-vm (Next VM)
 	• Cloned web-vm in VirtualBox to save time 
 	• Changed hostname to db-vm 
-		○ COMMAND - sudo hostnamectl set-hostname db-vm 
+		○ sudo hostnamectl set-hostname db-vm 
 	• Assigned static IP
-	• Logged in and tested connectivity from web-vm
+	• Logged in and tested connectivity from web-vm - Tested basic ping, SSH access, and connectivity between web-vm and db-vm.
 
-7. Applied iptables Firewall Rules
+---
+
+### 6. Applied iptables Firewall Rules
 	• On web-vm: restricted outbound traffic to only allow port 3306 to db-vm
 	• On db-vm: restricted inbound traffic to only accept 3306 from web-vm
 	• Blocked everything else by default (default-deny model)
+ 
+		 Default Policy: Deny All
+		sudo iptables -P INPUT DROP
+		sudo iptables -P OUTPUT DROP
+		sudo iptables -P FORWARD DROP
+		
+		On db-vm (MySQL server):
+		
+		Allow inbound MySQL from web-vm:
+		
+		sudo iptables -A INPUT -p tcp --dport 3306 -s 192.168.56.101 -j ACCEPT
+		
+		
+		Allow return traffic:
+		
+		sudo iptables -A OUTPUT -p tcp --sport 3306 -d 192.168.56.101 -j ACCEPT
+		sudo iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+		sudo iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+		
+		On web-vm (frontend app):
+		
+		Allow outbound MySQL to db-vm:
+		
+		sudo iptables -A OUTPUT -p tcp --dport 3306 -d 192.168.56.102 -j ACCEPT
+		
+		
+		Allow return traffic:
+		
+		sudo iptables -A INPUT -p tcp --sport 3306 -s 192.168.56.102 -j ACCEPT
+		sudo iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+		sudo iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+		
+		🔐 All other traffic is implicitly dropped.
 
- 8. Test Enforcement
-	• Tested allowed and denied connections using:
+  ---
+
+  ### 7: Tested Firewall Enforcement
+
+• Tested allowed and denied connections using:
 		○ ping
 		○ nc -zv
 		○ curl
 	• Verify segmentation works
 	• Optionally enable logging for dropped packets
 
-9. Persist Firewall Rules
+---
+
+### 8: Persisted iptables Rules
+
+Installed iptables-persistent:
+
+sudo apt install iptables-persistent
+sudo netfilter-persistent save
+10. Persist Firewall Rules
 Use iptables-persistent or a script to keep your rules after reboot
 
-10. Documented Traffic Flow & Security Justification
+
+Documented Traffic Flow & Security Justification
 	• Labeled each VM by function (frontend, database, mgmt)
 	• Show which flows are allowed and why (Zero Trust justification)
 
+---
 
+### Outcome
 
+Successfully implemented host-based microsegmentation using iptables
 
+Confirmed Zero Trust posture with enforced isolation and minimal access
+
+Each VM can only do what it's explicitly allowed to—nothing more
 
 
 
