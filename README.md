@@ -204,6 +204,10 @@ After reboot, you’ll be logged into a fully working Ubuntu Server VM.
 
 Configure your static IP address using netplan
 
+SSH'd into VM using cmd bc couldn't paste commands in VM. Now I can paste.
+
+
+
 
 
 
