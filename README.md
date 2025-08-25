@@ -45,14 +45,11 @@ This lab enforces Zero Trust based on NIST SP 800-207 guidance.
 ## Setup
 ### VMs and Their Roles:
 
-web-vm - IP: 192.168.56.101
+web-vm - 
 Role: Frontend application server. Initiates connections to the database only. No direct external or internal access to other resources.
 
-db-vm - IP: 192.168.56.102
+db-vm - 
 Role: Backend database server. Only receives traffic on port 3306 (MySQL) from the web server. No outbound traffic or lateral communication.
-
-admin-vm (optional) - IP: 192.168.56.103
-Role: Management/jumpbox system. Used for remote administration over SSH. Can reach both web-vm and db-vm via SSH but has no internet access.
 
 Each VM represents a different function or trust zone, and policies are designed to strictly control how and whether communication is allowed between them.
 
@@ -61,15 +58,14 @@ All VMs on same VirtualBox Host-Only Adapter.
 ## Step by Step
 
 1. Launched VirutalBox & Downloaded Ubuntu Server ISO
-2. Created VMs in VirtualBox (x3)
+2. Created VMs in VirtualBox (x2)
 
-      You’ll be making 3 VMs:
+      Made 2 VMs:
       
          - web-vm
          - db-vm
-         - admin-vm (optional but good for practice)
       
-      For each VM, do the following:
+      Set the following for the first VM, (cloned this for the 2nd VM)
       
       a. Create New VM
            Name: web-vm (or whatever function)
@@ -106,105 +102,63 @@ All VMs on same VirtualBox Host-Only Adapter.
           
           If you want outbound internet for package installs
 
-4. Install Ubuntu Server on Each VM
+4. Installed Ubuntu Server on VM
 
-🔧 What to Do After Ubuntu Server ISO Finishes Downloading
-1. Open VirtualBox
 
-Launch VirtualBox on your Windows system.
+5. Started the VM
 
-2. Create a New VM
+      Click Start
+      
+      In the Ubuntu Server installer:
+      
+      Select language: English
+      
+      Choose “Install Ubuntu Server”
+      
+      Accept network defaults for now
+      
+      Set a hostname (web-vm, etc.)
+      
+      Create a user (labuser or whatever you want)
+      
+      Choose “Install OpenSSH server” when prompted
+      
+      Continue with installation (guided disk partitioning is fine)
+      
+      Finish and reboot
+      
+      After reboot, you’ll be logged into a fully working Ubuntu Server VM.    
 
-Click “New” and fill this out:
+Configured static IP address using netplan
 
-Name: web-vm (or db-vm, or admin-vm, depending on which one you’re creating first)
+6. Created db-vm (Next VM)
+	• Cloned web-vm in VirtualBox to save time 
+	• Changed hostname to db-vm 
+		○ COMMAND - sudo hostnamectl set-hostname db-vm 
+	• Assigned static IP
+	• Logged in and tested connectivity from web-vm
 
-Type: Linux
+7. Applied iptables Firewall Rules
+	• On web-vm: restricted outbound traffic to only allow port 3306 to db-vm
+	• On db-vm: restricted inbound traffic to only accept 3306 from web-vm
+	• Blocked everything else by default (default-deny model)
 
-Version: Ubuntu (64-bit)
+ 8. Test Enforcement
+	• Tested allowed and denied connections using:
+		○ ping
+		○ nc -zv
+		○ curl
+	• Verify segmentation works
+	• Optionally enable logging for dropped packets
 
-Click Next
+9. Persist Firewall Rules
+Use iptables-persistent or a script to keep your rules after reboot
 
-3. Allocate Resources
+10. Documented Traffic Flow & Security Justification
+	• Labeled each VM by function (frontend, database, mgmt)
+	• Show which flows are allowed and why (Zero Trust justification)
 
-RAM: 1024 MB (1 GB minimum, 2048 MB is better)
 
-CPU: 1 or 2 (adjust if your system has more cores)
-
-Click Next
-
-4. Create a Virtual Hard Disk
-
-Select: Create a virtual hard disk now
-
-Disk type: VDI
-
-Storage: Dynamically allocated
-
-Size: 10 GB or more
-
-Click Create
-
-5. Attach the Ubuntu ISO
-
-Once the VM is created:
-
-Select the VM (e.g., web-vm)
-
-Click Settings > Storage
-
-Under Controller: IDE, click the Empty disk icon
-
-On the right side, click the CD icon, then choose “Choose a disk file…”
-
-Browse to where your .iso file was downloaded (e.g., Downloads)
-→ Select your ubuntu-22.04.4-live-server-amd64.iso
-
-Click OK
-
-6. Set Network to Host-Only
-
-Go to Settings > Network
-
-Adapter 1: Enabled
-
-Attached to: Host-Only Adapter
-
-(Optional: Add Adapter 2 as NAT if you want internet access later)
-
-7. Start the VM
-
-Click Start
-
-The VM will boot from the ISO file (like a real server booting from a CD)
-
-You’ll be in the Ubuntu Server installer
-
-8. Install Ubuntu Server
-
-In the Ubuntu Server installer:
-
-Select language: English
-
-Choose “Install Ubuntu Server”
-
-Accept network defaults for now
-
-Set a hostname (web-vm, etc.)
-
-Create a user (labuser or whatever you want)
-
-Choose “Install OpenSSH server” when prompted
-
-Continue with installation (guided disk partitioning is fine)
-
-Finish and reboot
-
-After reboot, you’ll be logged into a fully working Ubuntu Server VM.    
-
-Configure your static IP address using netplan
-
-SSH'd into VM using cmd bc couldn't paste commands in VM. Now I can paste.
 
 
 
